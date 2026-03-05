@@ -87,6 +87,13 @@ def applied_list() -> Any:
 def unsuccessful_list() -> Any:
     return jsonify(_db.list_unsuccessful_jobs())
 
+@app.get("/api/jobs")
+def jobs_list() -> Any:
+    status = request.args.get("status")
+    search = request.args.get("q")
+    limit = int(request.args.get("limit", "500"))
+    return jsonify(_db.list_jobs(limit=limit, status=status, search=search))
+
 
 @app.post("/api/run")
 def run_now() -> Any:

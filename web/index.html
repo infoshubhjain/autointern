@@ -71,13 +71,28 @@
       .row > * { flex: 1; }
       .muted { color: var(--muted); font-size: 12px; }
       .q-item { border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 10px; }
+      .tabs { display: flex; gap: 8px; margin: 12px 0 20px; }
+      .tab { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: #fff; }
+      .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .tab-pane { display: none; }
+      .tab-pane.active { display: block; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      thead th { position: sticky; top: 0; background: #faf9f6; border-bottom: 1px solid var(--border); text-align: left; padding: 8px; }
+      tbody td { border-bottom: 1px solid var(--border); padding: 8px; vertical-align: top; }
+      .table-wrap { max-height: 520px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+      .toolbar { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+      .toolbar input, .toolbar select { width: auto; }
     </style>
   </head>
   <body>
     <div class="wrap">
       <h1>AutoIntern</h1>
+      <div class="tabs">
+        <div class="tab active" data-tab="dashboard">Dashboard</div>
+        <div class="tab" data-tab="tracker">Tracker</div>
+      </div>
       <div class="grid">
-        <div class="card">
+        <div class="card tab-pane active" id="tab-dashboard">
           <h3>Profile</h3>
           <div class="row">
             <div>
@@ -120,7 +135,7 @@
           <button onclick="saveProfile()">Save Profile</button>
         </div>
 
-        <div class="card">
+        <div class="card tab-pane active" id="tab-dashboard-2">
           <h3>Resume</h3>
           <input type="file" id="resume" accept="application/pdf" />
           <button onclick="uploadResume()">Upload Resume</button>
@@ -132,22 +147,57 @@
           <p class="muted">Auto-apply runs in the background.</p>
         </div>
 
-        <div class="card">
+        <div class="card tab-pane active" id="tab-dashboard-3">
           <h3>Pending Questions</h3>
           <div id="questions" class="muted">No pending questions.</div>
           <button onclick="refreshQuestions()">Refresh</button>
         </div>
 
-        <div class="card">
+        <div class="card tab-pane active" id="tab-dashboard-4">
           <h3>Applied Jobs</h3>
           <div id="applied" class="muted">No applied jobs yet.</div>
           <button onclick="refreshApplied()">Refresh</button>
         </div>
 
-        <div class="card">
+        <div class="card tab-pane active" id="tab-dashboard-5">
           <h3>Unsuccessful Jobs</h3>
           <div id="unsuccessful" class="muted">No unsuccessful jobs yet.</div>
           <button onclick="refreshUnsuccessful()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-tracker">
+        <div class="card">
+          <h3>Tracker (Excel-style)</h3>
+          <div class="toolbar">
+            <label>Status</label>
+            <select id="track_status">
+              <option>ALL</option>
+              <option>APPLIED</option>
+              <option>FAILED</option>
+              <option>SKIPPED</option>
+              <option>QUEUED</option>
+              <option>IN_PROGRESS</option>
+            </select>
+            <label>Search</label>
+            <input id="track_search" placeholder="Company or title" />
+            <button onclick="refreshTracker()">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Company</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Updated</th>
+                  <th>URL</th>
+                </tr>
+              </thead>
+              <tbody id="tracker_rows"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -260,6 +310,20 @@
         });
       }
 
+      async function refreshTracker() {
+        const status = document.getElementById("track_status").value;
+        const q = document.getElementById("track_search").value;
+        const res = await fetch(`/api/jobs?status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`);
+        const items = await res.json();
+        const body = document.getElementById("tracker_rows");
+        body.innerHTML = "";
+        items.forEach(j => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${j.id}</td><td>${j.company}</td><td>${j.title}</td><td>${j.status}</td><td>${j.updated_at}</td><td>${j.url}</td>`;
+          body.appendChild(tr);
+        });
+      }
+
       function v(id) { return document.getElementById(id).value || ""; }
 
       async function loadProfile() {
@@ -276,6 +340,21 @@
       refreshApplied();
       refreshUnsuccessful();
       setInterval(refreshQuestions, 5000);
+      setInterval(refreshUnsuccessful, 5000);
+      refreshTracker();
+
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.getAttribute("data-tab");
+          const showTracker = target === "tracker";
+          document.getElementById("tab-tracker").classList.toggle("active", showTracker);
+          document.querySelectorAll(\"[id^='tab-dashboard']\").forEach(el => {
+            el.classList.toggle(\"active\", !showTracker);
+          });
+        });
+      });
     </script>
   </body>
 </html>

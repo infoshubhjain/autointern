@@ -254,6 +254,25 @@ class JobDB:
             ).fetchall()
             return [dict(row) for row in rows]
 
+    def list_jobs(self, limit: int = 500, status: str | None = None, search: str | None = None) -> List[dict]:
+        params: list = []
+        sql = "SELECT id, title, company, url, status, updated_at FROM jobs"
+        clauses = []
+        if status and status != "ALL":
+            clauses.append("status = ?")
+            params.append(status)
+        if search:
+            clauses.append("(title LIKE ? OR company LIKE ?)")
+            term = f"%{search}%"
+            params.extend([term, term])
+        if clauses:
+            sql += " WHERE " + " AND ".join(clauses)
+        sql += " ORDER BY updated_at DESC LIMIT ?"
+        params.append(limit)
+        with self._conn() as conn:
+            rows = conn.execute(sql, params).fetchall()
+            return [dict(row) for row in rows]
+
     def reset_status(self, from_status: str, to_status: str) -> int:
         with self._conn() as conn:
             cur = conn.execute(
