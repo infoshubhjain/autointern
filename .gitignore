@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+data/autointern.db
+auth/cookies.pkl
+assets/resume.pdf
+assets/cover_letter.pdf
+logs/*.log
+logs/screenshots/*
+.pytest_cache/

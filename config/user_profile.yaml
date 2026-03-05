@@ -1,0 +1,8 @@
+first_name: "YourFirstName"
+last_name: "YourLastName"
+email: "you@example.com"
+phone: "+1-555-555-5555"
+university: "Your University"
+linkedin: "https://www.linkedin.com/in/your-profile"
+github: "https://github.com/your-handle"
+resume_path: "assets/resume.pdf"

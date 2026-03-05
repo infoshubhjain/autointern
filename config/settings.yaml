@@ -1,0 +1,8 @@
+concurrency: 5
+daily_limit: 20
+sources:
+  - linkedin
+  - indeed
+llm:
+  enabled: false
+  provider: local

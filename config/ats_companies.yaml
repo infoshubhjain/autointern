@@ -1,0 +1,35 @@
+# Seed lists. Expand with more company slugs.
+simplify:
+  # The repo has moved this file in the past. We try each URL in order.
+  listings_urls:
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/.github/scripts/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/main/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/list_updater/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/main/list_updater/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/list_updater/data/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/main/list_updater/data/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/list_updater/output/listings.json"
+    - "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/main/list_updater/output/listings.json"
+
+greenhouse:
+  - stripe
+  - airbnb
+  - coinbase
+  - figma
+  - ramp
+  - brex
+
+lever:
+  - netflix
+  - figma
+  - notion
+  - vercel
+
+ashby:
+  - linear
+  - retool
+  - mercury
+
+workable:
+  - example-company

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AutoIntern</title>
+    <style>
+      :root {
+        --bg: #f4f3ef;
+        --ink: #1b1b1b;
+        --accent: #0f4c81;
+        --card: #ffffff;
+        --muted: #6c6c6c;
+        --border: #d7d2c7;
+      }
+      body {
+        margin: 0;
+        font-family: "Source Serif Pro", Georgia, serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 28px auto 80px;
+        padding: 0 20px;
+      }
+      h1 {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 20px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 8px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 10px;
+        color: var(--muted);
+      }
+      input, textarea, button {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 14px;
+        background: #fff;
+      }
+      textarea { min-height: 90px; }
+      button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-top: 12px;
+      }
+      .row { display: flex; gap: 10px; }
+      .row > * { flex: 1; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .q-item { border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>AutoIntern</h1>
+      <div class="grid">
+        <div class="card">
+          <h3>Profile</h3>
+          <div class="row">
+            <div>
+              <label>First Name</label>
+              <input id="first_name" />
+            </div>
+            <div>
+              <label>Last Name</label>
+              <input id="last_name" />
+            </div>
+          </div>
+          <label>Email</label>
+          <input id="email" />
+          <label>Phone</label>
+          <input id="phone" />
+          <label>Location</label>
+          <input id="location" />
+          <label>School</label>
+          <input id="school" />
+          <label>Degree</label>
+          <input id="degree" />
+          <label>Grad Year</label>
+          <input id="grad_year" />
+          <label>LinkedIn</label>
+          <input id="linkedin" />
+          <label>GitHub</label>
+          <input id="github" />
+          <label>Portfolio</label>
+          <input id="portfolio" />
+          <label>Work Authorization (Yes/No)</label>
+          <input id="work_authorization" />
+          <label>Sponsorship Needed (Yes/No)</label>
+          <input id="sponsorship" />
+          <label>GPA</label>
+          <input id="gpa" />
+          <label>Start Date</label>
+          <input id="start_date" />
+          <label>Default Answer (short)</label>
+          <textarea id="default_answer"></textarea>
+          <button onclick="saveProfile()">Save Profile</button>
+        </div>
+
+        <div class="card">
+          <h3>Resume</h3>
+          <input type="file" id="resume" accept="application/pdf" />
+          <button onclick="uploadResume()">Upload Resume</button>
+          <h3>Cover Letter</h3>
+          <input type="file" id="cover" accept="application/pdf" />
+          <button onclick="uploadCover()">Upload Cover</button>
+          <h3>Run</h3>
+          <button onclick="runNow()">Run AutoApply</button>
+          <p class="muted">Auto-apply runs in the background.</p>
+        </div>
+
+        <div class="card">
+          <h3>Pending Questions</h3>
+          <div id="questions" class="muted">No pending questions.</div>
+          <button onclick="refreshQuestions()">Refresh</button>
+        </div>
+
+        <div class="card">
+          <h3>Applied Jobs</h3>
+          <div id="applied" class="muted">No applied jobs yet.</div>
+          <button onclick="refreshApplied()">Refresh</button>
+        </div>
+
+        <div class="card">
+          <h3>Unsuccessful Jobs</h3>
+          <div id="unsuccessful" class="muted">No unsuccessful jobs yet.</div>
+          <button onclick="refreshUnsuccessful()">Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function saveProfile() {
+        const data = {
+          first_name: v("first_name"),
+          last_name: v("last_name"),
+          email: v("email"),
+          phone: v("phone"),
+          location: v("location"),
+          school: v("school"),
+          degree: v("degree"),
+          grad_year: v("grad_year"),
+          linkedin: v("linkedin"),
+          github: v("github"),
+          portfolio: v("portfolio"),
+          work_authorization: v("work_authorization"),
+          sponsorship: v("sponsorship"),
+          gpa: v("gpa"),
+          start_date: v("start_date"),
+          default_answer: v("default_answer"),
+        };
+        await fetch("/api/profile", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data)});
+        alert("Saved");
+      }
+
+      async function uploadResume() {
+        const f = document.getElementById("resume").files[0];
+        if (!f) return alert("Pick a PDF");
+        const fd = new FormData();
+        fd.append("file", f);
+        await fetch("/api/upload/resume", { method: "POST", body: fd });
+        alert("Uploaded");
+      }
+
+      async function uploadCover() {
+        const f = document.getElementById("cover").files[0];
+        if (!f) return alert("Pick a PDF");
+        const fd = new FormData();
+        fd.append("file", f);
+        await fetch("/api/upload/cover", { method: "POST", body: fd });
+        alert("Uploaded");
+      }
+
+      async function runNow() {
+        await fetch("/api/run", { method: "POST" });
+        alert("Run started");
+      }
+
+      async function refreshQuestions() {
+        const res = await fetch("/api/pending");
+        const qs = await res.json();
+        const el = document.getElementById("questions");
+        if (!qs.length) {
+          el.textContent = "No pending questions.";
+          return;
+        }
+        el.innerHTML = "";
+        qs.forEach(q => {
+          const div = document.createElement("div");
+          div.className = "q-item";
+          div.innerHTML = `<div><b>${q.question}</b></div>`;
+          const ta = document.createElement("textarea");
+          ta.placeholder = "Type answer...";
+          const btn = document.createElement("button");
+          btn.textContent = "Submit Answer";
+          btn.onclick = async () => {
+            await fetch("/api/answer", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ id: q.id, answer: ta.value })});
+            refreshQuestions();
+          };
+          div.appendChild(ta);
+          div.appendChild(btn);
+          el.appendChild(div);
+        });
+      }
+
+      async function refreshApplied() {
+        const res = await fetch("/api/applied");
+        const items = await res.json();
+        const el = document.getElementById("applied");
+        if (!items.length) {
+          el.textContent = "No applied jobs yet.";
+          return;
+        }
+        el.innerHTML = "";
+        items.forEach(j => {
+          const div = document.createElement("div");
+          div.className = "q-item";
+          div.innerHTML = `<div><b>${j.company}</b> — ${j.title}</div><div class="muted">${j.url}</div>`;
+          el.appendChild(div);
+        });
+      }
+
+      async function refreshUnsuccessful() {
+        const res = await fetch("/api/unsuccessful");
+        const items = await res.json();
+        const el = document.getElementById("unsuccessful");
+        if (!items.length) {
+          el.textContent = "No unsuccessful jobs yet.";
+          return;
+        }
+        el.innerHTML = "";
+        items.forEach(j => {
+          const div = document.createElement("div");
+          div.className = "q-item";
+          div.innerHTML = `<div><b>${j.company}</b> — ${j.title}</div><div class="muted">${j.status} · ${j.url}</div>`;
+          el.appendChild(div);
+        });
+      }
+
+      function v(id) { return document.getElementById(id).value || ""; }
+
+      async function loadProfile() {
+        const res = await fetch("/api/profile");
+        const p = await res.json();
+        for (const [k, v] of Object.entries(p)) {
+          const el = document.getElementById(k);
+          if (el) el.value = v;
+        }
+      }
+
+      loadProfile();
+      refreshQuestions();
+      refreshApplied();
+      refreshUnsuccessful();
+      setInterval(refreshQuestions, 5000);
+    </script>
+  </body>
+</html>
